@@ -1,0 +1,30 @@
+import requests
+import re
+firsturl='http://www.mosigra.ru/'
+r=requests.get(firsturl)
+emails=[]
+regex=firsturl + '([A-z0-9-/+=&?_$]+)'
+def scanpage(r, deep):
+	deep+=1
+	exdeep=deep
+	search(r)
+	urlsonpage = re.findall(r'<a href=[\'\"]'+regex + '[\'\"]>', r.text)
+	if deep < 3:
+		for i in range(len(urlsonpage)):
+			rg=requests.get(firsturl +urlsonpage[i])
+			scanpage(rg, deep)
+		deep=exdeep
+def search(r):
+	result=re.findall(r'([\w\.]+@[A-z0-9&-_+]+\.[A-z]{2,5})', r.text)
+	check=0
+	for i in range(len(result)):
+		for j in range(len(emails)):
+			if result[i]==emails[j]:
+					check=1
+		if check==0:
+			emails.append(result[i])
+		check=0
+	result=[]
+scanpage(r,1)	
+print(emails)
+print(len(emails))
